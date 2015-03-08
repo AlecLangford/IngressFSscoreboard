@@ -79,6 +79,22 @@ for item in urls:
 url1,url2=tables
 
 
+
+golden=''
+
+for item in url1:
+
+    item=item.split(",")
+    item[3]=int(item[3])
+    item[4]=int(item[4])
+    item[5]=int(item[5])
+    item[6]=int(item[6])
+
+    try:
+        c=player_begin.create(PlayerName=item[1].lower(),Faction=item[2],StartLevel=item[3],StartAP=item[4],StartKms=item[5],StartHacks=item[6])
+        golden+=item[1].lower()+"\n"
+    except IntegrityError:
+        pass
 ##############################################
 
 import re, collections
@@ -91,7 +107,7 @@ def train(features):
         model[f] += 1
     return model
 
-golden=''
+
 
 NWORDS = train(words(golden))
 
@@ -114,24 +130,16 @@ def correct(word):
     candidates = known([word]) or known(edits1(word)) or known_edits2(word) or [word]
     return max(candidates, key=NWORDS.get)
 
+
+
+
+
 #####################
 
 
 #print url1
 
-for item in url1:
 
-    item=item.split(",")
-    item[3]=int(item[3])
-    item[4]=int(item[4])
-    item[5]=int(item[5])
-    item[6]=int(item[6])
-
-    try:
-        c=player_begin.create(PlayerName=item[1].lower(),Faction=item[2],StartLevel=item[3],StartAP=item[4],StartKms=item[5],StartHacks=item[6])
-        golden+=item[1].lower()+"\n"
-    except IntegrityError:
-        pass
 
 for item in url2:
     item=item.split(",")
@@ -183,3 +191,4 @@ except ZeroDivisionError:
     r.write(str(0))
 
 r.close()
+
