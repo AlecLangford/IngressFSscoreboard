@@ -182,11 +182,13 @@ qry1 = player.select().where(player.Faction=="Enlightened")
 print
 r=open("enlightened","w")
 r.write(str(sum([item.DiffAP for item in qry1])/qry1.count()))
+print "e:",sum([item.DiffAP for item in qry1])
 r.close()
 qry1 = player.select().where(player.Faction=="Resistance")
 r=open("resistance","w")
 try:
     r.write(str(sum([item.DiffAP for item in qry1])/qry1.count()))
+    print "r:",sum([item.DiffAP for item in qry1])
 except ZeroDivisionError:
     r.write(str(0))
 
