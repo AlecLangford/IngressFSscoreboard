@@ -1,7 +1,7 @@
-#from storm.locals import Int, Reference, Unicode, create_database, Store
+
 
 from peewee import *
-import datetime, requests, urllib2, json
+import requests
 
 
 db = SqliteDatabase(':memory:', threadlocals=True)
@@ -79,6 +79,44 @@ for item in urls:
 url1,url2=tables
 
 
+##############################################
+
+import re, collections
+
+def words(text): return re.findall('[a-z=+0-9]+', text.lower())
+
+def train(features):
+    model = collections.defaultdict(lambda: 1)
+    for f in features:
+        model[f] += 1
+    return model
+
+golden=''
+
+NWORDS = train(words(golden))
+
+alphabet = 'abcdefghijklmnopqrstuvwxyz0987654321-_'
+
+def edits1(word):
+   splits     = [(word[:i], word[i:]) for i in range(len(word) + 1)]
+   deletes    = [a + b[1:] for a, b in splits if b]
+   transposes = [a + b[1] + b[0] + b[2:] for a, b in splits if len(b)>1]
+   replaces   = [a + c + b[1:] for a, b in splits for c in alphabet if b]
+   inserts    = [a + c + b     for a, b in splits for c in alphabet]
+   return set(deletes + transposes + replaces + inserts)
+
+def known_edits2(word):
+    return set(e2 for e1 in edits1(word) for e2 in edits1(e1) if e2 in NWORDS)
+
+def known(words): return set(w for w in words if w in NWORDS)
+
+def correct(word):
+    candidates = known([word]) or known(edits1(word)) or known_edits2(word) or [word]
+    return max(candidates, key=NWORDS.get)
+
+#####################
+
+
 #print url1
 
 for item in url1:
@@ -91,6 +129,7 @@ for item in url1:
 
     try:
         c=player_begin.create(PlayerName=item[1].lower(),Faction=item[2],StartLevel=item[3],StartAP=item[4],StartKms=item[5],StartHacks=item[6])
+        golden+=item[1].lower()+"\n"
     except IntegrityError:
         pass
 
@@ -101,7 +140,7 @@ for item in url2:
     item[4]=int(item[4])
     item[5]=int(item[5])
     try:
-        c=player_end.create(PlayerName=item[1].lower(),EndLevel=item[2],EndAP=item[3],EndKms=item[4],EndHacks=item[5])
+        c=player_end.create(PlayerName=correct(item[1].lower()),EndLevel=item[2],EndAP=item[3],EndKms=item[4],EndHacks=item[5])
     except IntegrityError:
         pass
 
