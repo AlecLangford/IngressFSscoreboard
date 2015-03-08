@@ -170,9 +170,9 @@ print "---"
 f=player._meta.get_field_names()[1:]
 #qry = player.select().where(player.Faction=="Enlightened").order_by(player.DiffLevel, player.DiffAP)
 
-qry = player.select().order_by(player.DiffLevel, player.DiffAP)
+qry = player.select().order_by(player.DiffLevel.desc(), player.DiffAP.desc())
 results=open("scoreboard.csv","w")
-for item in qry[::-1]:
+for item in qry:
     x=[str(getattr(item,i)) for i in f]
     results.write(",".join(x)+"\n")
 results.close()
@@ -191,6 +191,7 @@ try:
     print "r:",sum([item.DiffAP for item in qry1])
 except ZeroDivisionError:
     r.write(str(0))
+
 
 r.close()
 
