@@ -1,5 +1,4 @@
-import random
-import string
+
 import os
 from cherrypy.lib.static import serve_file
 from mako.template import Template
